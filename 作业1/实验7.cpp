@@ -1,162 +1,152 @@
 #include <iostream>
-#include <algorithm> 
+#include <vector>
+#include <algorithm>
 #include <string>
 using namespace std;
-// 定义教职工工资信息结构体
-struct EmployeeSalary {
+
+struct Employee {
 	string num;
 	string name;
 	string title;
-	int workage;
 	double dSalary[5];
-}staff[3];
+};
 
-void show1();
-void show2();
-void search1(string a);
-void search2(string b);
-void search3(double a, double b);
-void BubbleSort(double* arr, int n);
+// 比较函数，用于排序
+bool compareByNum(const Employee& a, const Employee& b) {
+	return a.num < b.num;
+}
 
-//显示信息查询
-void show1()
-{
-	cout << "===>1.按职工工号查询" << endl;
-	cout << "===>2.按职工姓名查询" << endl;
-	cout << "===>3.按工作范围查询" << endl;
-	cout << "===>0.退出查询" << endl;
-	cout << "请选择（1-3或0）：" << endl;
+bool compareByName(const Employee& a, const Employee& b) {
+	return a.name < b.name;
+}
+
+// 二分查找函数
+int binarySearch(const vector<Employee>& employees, const string& key, bool byNum) {
+	int low = 0;
+	int high = employees.size() - 1;
+
+	while (low <= high) {
+		int mid = low + (high - low) / 2;
+		if ((byNum && employees[mid].num == key) || (!byNum && employees[mid].name == key)) {
+			return mid;  // 找到关键字，返回索引
+		}
+		else if ((byNum && employees[mid].num < key) || (!byNum && employees[mid].name < key)) {
+			low = mid + 1;
+		}
+		else {
+			high = mid - 1;
+		}
+	}
+
+	return -1;  // 没有找到关键字
+}
+
+// 删除指定索引的元素
+void deleteEmployee(vector<Employee>& employees, int index) {
+	employees.erase(employees.begin() + index);
+}
+
+int main() {
+	// 初始化员工数据库
+	vector<Employee> employeeDatabase = {
+		{"2436", "张树", "讲师", {2050, 2037, 1903, 1270, 3500}},
+		{"5201", "李华", "副教授", {2950, 2337, 1903, 1270, 3500}},
+		{"1326", "王一", "教授", {3450, 2437, 1903, 1270, 3500}}
+		// 可以继续添加更多的员工信息
+	};
+
+	// 对员工信息按工号进行排序
+	sort(employeeDatabase.begin(), employeeDatabase.end(), compareByNum);
+
 	int choice;
-	string a, b;
-	double c=0, d=0;
-	cin >> choice;
-	switch (choice) {
-	case 1:
-		search1(a); break;
-	case 2:
-		search2(b); break;
-	case 3:
-		search3(c,d); break;
-	case 0:
-		cout << "已退出！" << endl; break;
-	}
-}
-//信息输出
-void show2()
-{
-	cout << "工号" << "    姓名   " << " 职称   " << " 岗位工资" << " 薪级工资" << " 岗位津贴" << " 生活补贴" << " 奖励绩效" << endl;
-	for (int i = 0; i < 3; i++)
-	{
-		cout << staff[i].num << "\t" << staff[i].name << "\t" << staff[i].title << "\t";
-		for (int j = 0; j < 5; j++)
-		{
-			cout << staff[i].dSalary[j] << "      ";
-		}
-		cout << endl;
-	}
+	string key;
 
-}
-//按工号查询
-void search1(string a)
-{
-	cin >> a;
-	int i = 0;
-	for (;i < 3; i++)
-	{
-		if (a == staff[i].num) break;
-	}
-	cout << "工号" << "    姓名   " << " 职称   " << " 岗位工资" << " 薪级工资" << " 岗位津贴" << " 生活补贴" << " 奖励绩效" << endl;
-	cout << staff[i].num << "\t" << staff[i].name << "\t" << staff[i].title << "\t";
-	for (int j = 0; j < 5; j++)
-	{
-		cout << staff[i].dSalary[j] << "      ";
-	}
+	do {
+		cout << "====>1.按工号查询\n"
+			<< "====>2.按姓名查询\n"
+			<< "====>0.退出\n"
+			<< "请选择（1-2或0）: ";
+		cin >> choice;
 
-}
-//按姓名查询
-void search2(string b)
-{
-	cin >> b;
-	int i = 0;
-	for (; i < 3; i++)
-	{
-		if (b == staff[i].name) break;
-	}
-	cout << "工号" << "    姓名   " << " 职称   " << " 岗位工资" << " 薪级工资" << " 岗位津贴" << " 生活补贴" << " 奖励绩效" << endl;
-	cout << staff[i].num << "\t" << staff[i].name << "\t" << staff[i].title << "\t";
-	for (int j = 0; j < 5; j++)
-	{
-		cout << staff[i].dSalary[j] << "      ";
-	}
-}
-//按工资范围查询
-void search3(double a,double b)
-{
-	cout << "请输入要查询的工资范围（最低工资和最高工资，用空格隔开）：";
-	cin >> a >> b;
-	BubbleSort(staff[0].dSalary, 5);
-	BubbleSort(staff[1].dSalary, 5);
-	BubbleSort(staff[2].dSalary, 5);
-	bool found = false;
-	for (int i = 0; i < 3; i++) {
+		switch (choice) {
+		case 1: {
+			cout << "请输入要查询的工号: ";
+			cin >> key;
 
-		if (staff[i].dSalary[0] >= a && staff[i].dSalary[4] <= b) {
-			cout << "工号：" << staff[i].title << "，姓名：" << staff[i].name << "，工资：" << staff[i].dSalary << endl;
-			found = true;
-		}
-	}
-	if (!found) {
-		cout << "未找到符合要求的员工信息！" << endl;
-	}
-}
+			// 二分查找关键字
+			int index = binarySearch(employeeDatabase, key, true);
 
-//冒泡排序
-void BubbleSort(double* arr, int n)
-{
-	int end = n;
-	while (end)
-	{
-		int flag = 0;
-		for (int i = 1; i < end; ++i)
-		{
-			if (arr[i - 1] > arr[i])
-			{
-				double tem = arr[i];
-				arr[i] = arr[i - 1];
-				arr[i - 1] = tem;
-				flag = 1;
+			if (index != -1) {
+				// 找到了，显示员工信息
+				cout << "找到员工信息：" << endl;
+				cout << "工号\t姓名\t职称\t岗位工资\t薪级工资\t岗位津贴\t生活补贴\t奖励绩效\n";
+				cout << employeeDatabase[index].num << "\t"
+					<< employeeDatabase[index].name << "\t"
+					<< employeeDatabase[index].title << "\t"
+					<< employeeDatabase[index].dSalary[0] << "\t"
+					<< employeeDatabase[index].dSalary[1] << "\t"
+					<< employeeDatabase[index].dSalary[2] << "\t"
+					<< employeeDatabase[index].dSalary[3] << "\t"
+					<< employeeDatabase[index].dSalary[4] << endl;
+
+				// 删除员工信息
+				cout << "是否删除该员工信息？(y/n): ";
+				char confirm;
+				cin >> confirm;
+
+				if (confirm == 'y' || confirm == 'Y') {
+					deleteEmployee(employeeDatabase, index);
+					cout << "员工信息已删除。\n";
+				}
 			}
-		}
-		if (flag == 0)
-		{
+			else {
+				cout << "未找到符合要求的员工信息！\n";
+			}
 			break;
 		}
-		--end;
-	}
-}
+		case 2: {
+			cout << "请输入要查询的姓名: ";
+			cin >> key;
 
-int main()
-{
-	staff[0].num = "2436";
-	staff[0].name = "张树";
-	staff[0].title = "讲师";
-	staff[0].dSalary[0] = 2050;
-	staff[0].dSalary[1] = 2037;
-	staff[1].num = "5201";
-	staff[1].name = "李华";
-	staff[1].title = "副教授";
-	staff[1].dSalary[0] = 2950;
-	staff[1].dSalary[1] = 2337;
-	staff[2].num = "1326";
-	staff[2].name = "王一";
-	staff[2].title = "教授";
-	staff[2].dSalary[0] = 3450;
-	staff[2].dSalary[1] = 2437;
-	for (int i = 0; i < 3; i++)
-	{
-		staff[i].dSalary[2] = 1903;
-		staff[i].dSalary[3] = 1270;
-		staff[i].dSalary[4] = 3500;
-	}
+			// 二分查找关键字
+			int index = binarySearch(employeeDatabase, key, false);
+
+			if (index != -1) {
+				// 找到了，显示员工信息
+				cout << "找到员工信息：" << endl;
+				cout << "工号\t姓名\t职称\t岗位工资\t薪级工资\t岗位津贴\t生活补贴\t奖励绩效\n";
+				cout << employeeDatabase[index].num << "\t"
+					<< employeeDatabase[index].name << "\t"
+					<< employeeDatabase[index].title << "\t"
+					<< employeeDatabase[index].dSalary[0] << "\t"
+					<< employeeDatabase[index].dSalary[1] << "\t"
+					<< employeeDatabase[index].dSalary[2] << "\t"
+					<< employeeDatabase[index].dSalary[3] << "\t"
+					<< employeeDatabase[index].dSalary[4] << endl;
+
+				// 删除员工信息
+				cout << "是否删除该员工信息？(y/n): ";
+				char confirm;
+				cin >> confirm;
+
+				if (confirm == 'y' || confirm == 'Y') {
+					deleteEmployee(employeeDatabase, index);
+					cout << "员工信息已删除。\n";
+				}
+			}
+			else {
+				cout << "未找到符合要求的员工信息！\n";
+			}
+			break;
+		}
+		case 0:
+			cout << "退出程序。\n";
+			break;
+		default:
+			cout << "无效的选择，请重新输入。\n";
+		}
+
+	} while (choice != 0);
+
 	return 0;
 }
